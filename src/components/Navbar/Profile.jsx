@@ -2,48 +2,50 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { CgProfile, CgLogOut, CgHeart, CgShoppingCart } from "react-icons/cg";
 import { SiGmail } from "react-icons/si";
 import { FiSettings } from "react-icons/fi";
-import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AllContext';
 
-export default function Profile({ dark, setDark }) {
+export default function Profile() {
+    const { setLogin, profile } = useAuth() || {};
 
-    const { setLogin, profile } = useAuth();
-
-    const name = localStorage.getItem("name") || "Guest User";
-    const email = localStorage.getItem("email") || "guest@librocart.com";
+    const name = localStorage.getItem("name") || profile?.name || "Guest User";
+    const email = localStorage.getItem("email") || profile?.email || "guest@librocart.com";
+    
+    const firstLetter = name.trim().charAt(0).toUpperCase();
 
     const handleLogout = () => {
         localStorage.removeItem("userId");
         localStorage.removeItem("userToken");
         localStorage.removeItem("name");
         localStorage.removeItem("email");
-        setShowMenu(false);   
-      };
+        if (setLogin) setLogin(false);
+        
+        window.location.reload(); 
+    };
 
     const menuLinks = [
         { name: "My Profile", href: "/profile", icon: CgProfile },
         { name: "My Cart", href: "/cart", icon: CgShoppingCart },
         { name: "Wishlist", href: "/wishlist", icon: CgHeart },
-        { name: "Theme", href: "#", icon: dark ? MdOutlineLightMode : MdOutlineDarkMode, action: () => setDark(!dark) },
-        { name: "Sign out",href:'#', icon: CgLogOut, action: handleLogout },
         { name: "Settings", href: "/dashBoard", icon: FiSettings },
+        { name: "Sign out", href: '#', icon: CgLogOut, action: handleLogout },
     ]
 
     return (
         <div>
             <Menu as="div" className="relative ml-3">
                 <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5F1F] hover:ring-2 hover:ring-[#FF5F1F]/50 transition-all">
-                {
-                    //  profile.profileImg ?
-                    <img
-                        alt="Profile"
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7qBwe4sAbrWYwL4CNVydr8pp2D8sY-aJPlA&s"
-                        className="size-10 rounded-full bg-gray-800 ring-2 ring-[#FF5F1F]/30 hover:ring-[#FF5F1F]/70 transition-all duration-300"
-                    /> 
-                    // :
-                    // profile?.name?.toUpperCase() || 'P'
-                }       
+                    {profile?.profileImg ? (
+                        <img
+                            alt="Profile"
+                            src={profile.profileImg}
+                            className="size-10 rounded-full bg-gray-800 ring-2 ring-[#FF5F1F]/30 hover:ring-[#FF5F1F]/70 transition-all duration-300 object-cover"
+                        />
+                    ) : (
+                        <div className="size-10 rounded-full bg-[#FF5F1F] text-white flex items-center justify-center font-bold text-lg ring-2 ring-[#FF5F1F]/30 hover:ring-[#FF5F1F]/70 transition-all duration-300 shadow-md">
+                            {firstLetter}
+                        </div>
+                    )}       
                 </MenuButton>
 
                 <MenuItems
@@ -69,7 +71,6 @@ export default function Profile({ dark, setDark }) {
                         </div>
                     </div>
 
-                    {/* Menu Links Loop */}
                     <div className="py-1">
                         {menuLinks.map((item, index) => (
                             <MenuItem key={index}>

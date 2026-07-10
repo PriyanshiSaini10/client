@@ -1,4 +1,5 @@
-import {BrowserRouter, Routes, Route , Navigate} from 'react-router-dom'
+import {BrowserRouter, Routes, Route , Navigate , useLocation} from 'react-router-dom'
+import { useEffect } from 'react';
 import Navbar from './components/Navbar/Navbar.jsx'
 import Home from './components/Home/Home.jsx'
 import About from './components/pages/About.jsx'
@@ -16,6 +17,16 @@ import Checkout from './components/pages/Checkout.jsx';
 import Dashboard from './components/Dashboard/HomeDashboard.jsx'
 import { useAuth } from './context/AllContext.jsx'
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function PrivateRoute({children}){
   const {login} = useAuth()
   return login ? children : <Navigate to = "/" replace />
@@ -26,6 +37,7 @@ export default function App() {
     <div>
       <CartProvider>
       <BrowserRouter>
+      <ScrollToTop />
       <Navbar/>
       <Routes> 
 

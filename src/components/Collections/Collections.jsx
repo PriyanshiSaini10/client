@@ -1,7 +1,7 @@
-import { useState , useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiSearch, HiX, HiShoppingCart } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom'; 
 import { BookCard } from '../BookCard.jsx';
 import { books, categories } from '../data/books.js';
 import { useCart } from '../context/CartContext.jsx';
@@ -13,16 +13,40 @@ export default function Collections() {
   const { getCartCount } = useCart();
   const cartCount = getCartCount();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+  const categoryParam = searchParams.get('category');
+  
+  if (categoryParam) {
+    setSelectedCategory(categoryParam);
+  } else {
+    setSelectedCategory('All');
+  }
+ }, [searchParams]);
+
   const filteredBooks = books.filter((book) => {
-    const matchesCategory = selectedCategory === 'All' || book.category === selectedCategory;
-    const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         book.author.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const matchesCategory = selectedCategory === 'All' || book.category === selectedCategory;
+  
+  const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        book.author.toLowerCase().includes(searchQuery.toLowerCase());
+                        
+  return matchesCategory && matchesSearch;
   });
 
   useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
+    window.scrollTo(0, 0);
+  }, []);
+
+ const handleCategoryChange = (category) => {
+  setSelectedCategory(category);
+  if (category === 'All') {
+    searchParams.delete('category');
+  } else {
+    searchParams.set('category', category); 
+  }
+  setSearchParams(searchParams);
+ };
 
   return (
     <div className="min-h-screen bg-[#121212]">
@@ -91,7 +115,6 @@ export default function Collections() {
               <motion.button
                 key={category}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                   selectedCategory === category
                     ? 'bg-[#FF5F1F] text-white shadow-lg shadow-orange-900/20'

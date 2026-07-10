@@ -128,19 +128,19 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <HiLocationMarker className="text-[#FF5F1F] text-lg mt-0.5 flex-shrink-0" />
                 <span className="text-zinc-400 text-sm">
-                  123 Book Street<br />New York, NY 10001
+                  123 Book Street<br />Kaithal,India
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <HiPhone className="text-[#FF5F1F] text-lg flex-shrink-0" />
                 <a href="tel:+1234567890" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
-                  +1 (234) 567-890
+                  +91 96754 26548
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <HiMail className="text-[#FF5F1F] text-lg flex-shrink-0" />
                 <a href="mailto:support@librocart.com" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
-                  support@librocart.com
+                  librocart987@gmail.com
                 </a>
               </li>
             </ul>

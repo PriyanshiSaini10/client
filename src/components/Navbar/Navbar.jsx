@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlineHome, HiOutlineInformationCircle, HiOutlineCollection, HiOutlineMail, HiMenu, HiX, HiOutlineBookOpen } from 'react-icons/hi';
 import Profile from './Profile.jsx';
@@ -7,6 +7,10 @@ import { useAuth } from '../../context/AllContext.jsx';
 
 export default function Navbar() {
   const [showMenu, setShowMenu] = useState(false);
+  
+  // Auth state check
+  const { userToken } = useAuth() || {};
+  const isAuthenticated = !!(userToken || localStorage.getItem("userToken"));
 
   const MenuData = [
     { name: "Home", icons: <HiOutlineHome />, link: "/" },
@@ -16,16 +20,16 @@ export default function Navbar() {
   ];
 
   const Auth = [
-    { name: "LogIn", link: "/user-login", css: "text-zinc-300 hover:text-white font-bold" },
-    { name: "SignUp", link: "/create-account", css: "bg-[#FF5F1F] text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-orange-900/20" },
+    { name: "LogIn", link: "/user-login", css: "text-white font-bold transition-colors"  },
+    {  name: "SignUp", link: "/create-account", css: "bg-[#FF5F1F] text-white px-5 py-2 rounded-lg font-bold shadow-lg shadow-orange-900/20 block text-center"},
   ];
 
   return (
     <nav className="bg-[#121212] border-b border-zinc-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative">
         
-        {/* Logo Section */}
-        <Link to="/" className="flex items-center gap-2 group">
+        {/* Left: Logo Section */}
+        <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
           <motion.div 
             whileHover={{ rotate: 10 }}
             className="bg-[#FF5F1F] p-2 rounded-lg text-white"
@@ -37,14 +41,14 @@ export default function Navbar() {
           </h1>
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-35">
-          <ul className="flex items-center gap-6">
+        {/* Center: Desktop Links */}
+        <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2">
+          <ul className="flex items-center gap-8">
             {MenuData.map(({ name, icons, link }, index) => (
               <motion.li key={index} whileHover={{ y: -2 }}>
                 <Link 
                   to={link} 
-                  className="flex items-center gap-2 text-zinc-400 hover:text-[#FF5F1F] transition-colors font-medium"
+                  className="flex items-center gap-2 text-zinc-400 hover:text-[#FF5F1F] transition-colors font-medium whitespace-nowrap"
                 >
                   <span className="text-xl">{icons}</span>
                   {name}
@@ -52,25 +56,32 @@ export default function Navbar() {
               </motion.li>
             ))}
           </ul>
-
-          <div className="flex items-center gap-5">
-            {Auth.map(({ name, link, css }, index) => (
-              <Link to={link} key={index}>
-                <motion.button 
-                  whileTap={{ scale: 0.95 }}
-                  className={css}
-                >
-                  {name}
-                </motion.button>
-              </Link>
-            ))}
-            <Profile />
-          </div>
         </div>
 
-        {/* Mobile Toggle */}
-        <div className="md:hidden flex items-center gap-4">
-          <Profile />
+        {/* Right: Profile / Auth Buttons */}
+        <div className="hidden md:flex items-center gap-5 flex-shrink-0">
+          {isAuthenticated ? (
+            <Profile />
+          ) : (
+            <div className="flex items-center gap-5">
+              {Auth.map(({ name, link, css }, index) => (
+                <Link to={link} key={index}>
+                  <motion.button 
+                    whileTap={{ scale: 0.95 }}
+                    className={css}
+                  >
+                    {name}
+                  </motion.button>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile View Toggle */}
+        <div className="md:hidden flex items-center gap-3">
+          {isAuthenticated && <Profile />}
+          
           <button 
             onClick={() => setShowMenu(!showMenu)} 
             className="text-[#FF5F1F] text-3xl"
@@ -101,15 +112,18 @@ export default function Navbar() {
                   {name}
                 </Link>
               ))}
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {Auth.map(({ name, link, css }, index) => (
-                  <Link to={link} key={index} onClick={() => setShowMenu(false)}>
-                    <button className={`${css} w-full py-3 text-center rounded-xl`}>
-                      {name}
-                    </button>
-                  </Link>
-                ))}
-              </div>
+              
+              {!isAuthenticated && (
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {Auth.map(({ name, link, css }, index) => (
+                    <Link to={link} key={index} onClick={() => setShowMenu(false)}>
+                      <button className={`${css} w-full py-2.5 text-center rounded-xl`}>
+                        {name}
+                      </button>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}

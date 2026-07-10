@@ -55,7 +55,7 @@ export default function ContactUs() {
             <h3 className="text-lg font-bold text-white mb-2">Email Us</h3>
             <p className="text-zinc-400 mb-2">Send us an email anytime</p>
             <a href="mailto:support@librocart.com" className="text-[#FF5F1F] hover:underline">
-              support@librocart.com
+              librocart987@gmail.com
             </a>
           </motion.div>
 
@@ -71,7 +71,7 @@ export default function ContactUs() {
             <h3 className="text-lg font-bold text-white mb-2">Call Us</h3>
             <p className="text-zinc-400 mb-2">Mon-Fri from 8am to 6pm</p>
             <a href="tel:+1234567890" className="text-[#FF5F1F] hover:underline">
-              +1 (234) 567-890
+              +91 96754 26548
             </a>
           </motion.div>
 
@@ -86,7 +86,7 @@ export default function ContactUs() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Visit Us</h3>
             <p className="text-zinc-400 mb-2">Come say hello</p>
-            <p className="text-white">123 Book Street, NY 10001</p>
+            <p className="text-white">123 Book Street, Kaithal, India</p>
           </motion.div>
         </div>
 
