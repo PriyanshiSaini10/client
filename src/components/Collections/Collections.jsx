@@ -6,7 +6,7 @@ import { BookCard } from '../BookCard.jsx';
 import { books, categories } from '../data/books.js'; 
 import { useCart } from '../context/CartContext.jsx';
 
-const ITEMS_PER_PAGE = 8; // Number of books per page
+const ITEMS_PER_PAGE = 8; 
 
 export default function Collections() {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -52,6 +52,7 @@ export default function Collections() {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
+    setCurrentPage(1);
     updateUrlParams('category', category);
   };
 
@@ -83,10 +84,14 @@ export default function Collections() {
     return 0;
   });
 
-  // 4. Pagination Slice
-  const totalPages = Math.ceil(sortedAndFilteredBooks.length / ITEMS_PER_PAGE);
+  // 4. Conditional Pagination Logic: 'All' section gets all books, categories get paginated books
+  const isPaginationActive = selectedCategory !== 'All';
+  const totalPages = isPaginationActive ? Math.ceil(sortedAndFilteredBooks.length / ITEMS_PER_PAGE) : 1;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedBooks = sortedAndFilteredBooks.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  const displayedBooks = isPaginationActive 
+    ? sortedAndFilteredBooks.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    : sortedAndFilteredBooks;
 
   return (
     <div className="min-h-screen bg-[#121212]">
@@ -209,7 +214,7 @@ export default function Collections() {
 
       {/* Books Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {paginatedBooks.length === 0 ? (
+        {displayedBooks.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-zinc-400 text-lg">No books found matching your criteria.</p>
           </div>
@@ -219,7 +224,7 @@ export default function Collections() {
               layout
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 justify-center min-h-[500px]"
             >
-              {paginatedBooks.map((book) => (
+              {displayedBooks.map((book) => (
                 <motion.div
                   key={book.id}
                   layout
@@ -234,8 +239,8 @@ export default function Collections() {
               ))}
             </motion.div>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
+            {/* Pagination Controls (Only renders when active & totalPages > 1) */}
+            {isPaginationActive && totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 <button
                   disabled={currentPage === 1}
