@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, 
-  FaVenusMars, FaArrowRight, FaCheckCircle, FaTimes 
+  FaVenusMars, FaArrowRight 
 } from 'react-icons/fa';
 import { FcGoogle } from "react-icons/fc";
 import axios from 'axios';
@@ -16,8 +16,6 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState('');
   const [done, setDone] = useState(false);
 
   const navigate = useNavigate();
@@ -28,25 +26,23 @@ export default function SignUp() {
 
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      setSubmitError('');
 
       try {
+        const response = await axios.post(`${LocalUrl}create_user`, values);
 
-        const response = await axios.post(`${LocalUrl}create_user`, values)
-
-        if(response.status==200 || response.status==201) {
-          showSuccessToast(response?.data?.msg || "Succesfully create user")
-          localStorage.setItem('email', response?.data?.userDB?.email)
+        if (response.status === 200 || response.status === 201) {
+          showSuccessToast(response?.data?.msg || "Successfully created user");
+          localStorage.setItem('email', response?.data?.userDB?.email);
           navigate(`/otp/user_otp_verification/${response.data.userDB._id}`);
         }
       }
-       catch (error) {
-        if(error?.response?.data?.msg === "user already verified please login"){
-          navigate('/user-login')
-          showSuccessToast(error.response?.data?.msg || "server error")
+      catch (error) {
+        if (error?.response?.data?.msg === "user already verified please login") {
+          navigate('/user-login');
+          showSuccessToast(error.response?.data?.msg || "Server error");
         }
-        else{
-          showErrorToast(error?.response?.data?.msg || "server error")
+        else {
+          showErrorToast(error?.response?.data?.msg || "Server error");
         }
       } 
       finally {

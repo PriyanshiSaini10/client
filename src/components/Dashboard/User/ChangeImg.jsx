@@ -1,149 +1,143 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaCamera, FaCloudUploadAlt, FaCloudUploadAlt as FaUpload } from 'react-icons/fa';
+import { useAuth } from '../../context/AllContext.jsx';
 import { LocalUrl } from '../../../GlobalUrl.jsx';
-import { showErrorToast, showSuccessToast } from '../../Notification/ToastNotification.jsx';
-import { useAuth } from '../../../context/AllContext.jsx';
+import { showSuccessToast, showErrorToast } from '../../Notification/ToastNotification.jsx';
+import { HiOutlineCloudUpload, HiOutlineTrash } from 'react-icons/hi';
 
 export default function ChangeImg() {
-  const { profile, setProfile } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const fileInputRef = useRef(null);
+  const { user, updateUser, userToken } = useAuth() || {};
 
-  const handleFileChange = (e) => {
+  const userId = user?.id || localStorage.getItem('userId');
+  const token = userToken || localStorage.getItem('userToken');
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(user?.avatar || user?.profileImg || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const name = user?.name || localStorage.getItem('name') || "User";
+  const initial = name.charAt(0).toUpperCase();
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        showErrorToast("File size should be less than 2MB");
+        showErrorToast("File size must be less than 2MB");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-        change_img(file);
-      };
-      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  const change_img = async (imgFile) => {
-    const id = localStorage.getItem('userId');
-    const token = localStorage.getItem('userToken');
-    const formData = new FormData();
-    formData.append('profileImg', imgFile);
+  const handleRemove = () => {
+    setSelectedFile(null);
+    setPreview(user?.avatar || user?.profileImg || null);
+  };
 
-    setIsLoading(true);
+  const handleSave = async () => {
+    if (!selectedFile) {
+      showErrorToast("Please select an image first");
+      return;
+    }
+
+    if (!userId || !token) {
+      showErrorToast("User session expired. Please log in again.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const url = `${LocalUrl}change_profile_img/${id}`;
-      const response = await axios.put(url, formData, {headers: { 'x-api-key': token }});
-      
-      if (response.status === 200) {
-        showSuccessToast(response?.data?.msg || "Successfully Changed Image");
-        setProfile({ ...profile, profileImg: response?.data?.DB?.profileImg });
-        setPreviewUrl(null);
+      const formData = new FormData();
+      formData.append('avatar', selectedFile);
+
+      // URL me userId aur Header me x-api-key sent
+      const response = await axios.put(
+        `${LocalUrl}change_profile_img/${userId}`,
+        formData,
+        {
+          headers: {
+            'x-api-key': token,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data?.status || response.status === 200) {
+        showSuccessToast(response.data?.msg || "Profile picture updated!");
+        
+        const newAvatarUrl = response.data?.updatedUser?.avatar || response.data?.avatar || preview;
+        
+        // Context state & localStorage sync
+        if (updateUser) {
+          updateUser({ avatar: newAvatarUrl, profileImg: newAvatarUrl });
+        }
+        
+        setSelectedFile(null);
       }
-    } 
-    catch (err) {
-      showErrorToast(err.response?.data?.msg || "Failed to change image");
-      setPreviewUrl(null);
-    } 
-    finally {
-      setIsLoading(false);
+    } catch (error) {
+      showErrorToast(error?.response?.data?.msg || "Image upload failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#121212] p-4">
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-sm w-full bg-[#1a1a1a] p-8 rounded-3xl border border-zinc-800 shadow-2xl shadow-black/50 text-center"
-      >
-        <h3 className="text-white font-bold text-xl mb-2 flex items-center justify-center gap-2">
-          <FaCamera className="text-[#FF5F1F]" /> Profile Photo
-        </h3>
-        <p className="text-zinc-500 text-sm mb-8">Update your avatar image</p>
+    <div className="space-y-6 text-white font-sans">
+      <div className="border-b border-zinc-800 pb-3">
+        <h2 className="text-xl font-black text-white tracking-wide">Profile Image</h2>
+        <p className="text-xs text-zinc-400 mt-1">Upload a custom profile avatar for your LibroCart account</p>
+      </div>
 
-        <div className="relative inline-block group">
-          {/* Profile Image Circle */}
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-[#FF5F1F]/20 group-hover:border-[#FF5F1F] transition-all duration-500 shadow-xl shadow-[#FF5F1F]/10"
-          >
-            {/* Loading Spinner Overlay */}
-            <AnimatePresence>
-              {isLoading && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 backdrop-blur-sm"
-                >
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-10 h-10 border-4 border-t-[#FF5F1F] border-zinc-700 rounded-full mb-2"
-                  />
-                  <span className="text-[10px] text-[#FF5F1F] font-bold tracking-widest uppercase">Uploading</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
+      <div className="flex flex-col items-center justify-center p-8 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-2xl space-y-4">
+        
+        {/* Profile Avatar / Letter Preview */}
+        <div className="relative group">
+          {preview ? (
             <img
-              src={previewUrl || profile?.profileImg }
-              alt="Profile"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              src={preview}
+              alt="Avatar Preview"
+              className="w-28 h-28 rounded-full object-cover border-2 border-[#FF5F1F] shadow-xl shadow-orange-950/30"
             />
-
-            {/* Hover Camera Icon Overlay */}
-            {!isLoading && (
-              <button 
-                onClick={() => fileInputRef.current.click()}
-                className="absolute inset-0 bg-[#FF5F1F]/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 backdrop-blur-[2px]"
-              >
-                <div className="bg-white/20 p-4 rounded-full backdrop-blur-md">
-                  <FaUpload className="text-white text-2xl" />
-                </div>
-              </button>
-            )}
-          </motion.div>
-
-          {/* Floating Camera Button */}
-          <button 
-            onClick={() => fileInputRef.current.click()}
-            className="absolute bottom-2 right-2 bg-[#FF5F1F] p-3 rounded-full text-white shadow-lg hover:bg-[#ff4d0a] transition-all transform hover:scale-110 border-4 border-[#1a1a1a]"
-          >
-            <FaCamera size={16} />
-          </button>
+          ) : (
+            <div className="w-28 h-28 rounded-full bg-[#FF5F1F] text-white flex items-center justify-center font-black text-4xl shadow-xl shadow-orange-950/30 border-2 border-orange-400/20">
+              {initial}
+            </div>
+          )}
         </div>
 
-        <input 
-          type="file" 
-          hidden 
-          ref={fileInputRef} 
-          onChange={handleFileChange}
-          accept="image/*"
-        />
+        {/* Upload Controls */}
+        <div className="flex items-center gap-3">
+          <label className="inline-flex items-center gap-2 bg-[#FF5F1F] hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer transition-all shadow-lg shadow-orange-950/30 active:scale-95">
+            <HiOutlineCloudUpload size={18} /> Choose Image
+            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+          </label>
 
-        <div className="mt-8 space-y-4">
-          <div className="py-2 px-4 rounded-xl bg-[#121212] border border-zinc-800 inline-block">
-             <p className="text-zinc-400 text-[11px] uppercase tracking-widest font-semibold">
-               Max File Size: <span className="text-white">2 MB</span>
-             </p>
-          </div>
-          
-          <button 
-            disabled={isLoading}
-            onClick={() => fileInputRef.current.click()}
-            className="w-full py-4 bg-[#FF5F1F] hover:bg-[#ff4d0a] text-white rounded-2xl font-bold shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isLoading ? "Please Wait..." : "Select New Image"}
-          </button>
+          {selectedFile && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="p-2.5 bg-zinc-800/80 hover:bg-red-500/10 hover:text-red-400 text-zinc-400 rounded-xl transition-colors"
+              title="Remove selected image"
+            >
+              <HiOutlineTrash size={18} />
+            </button>
+          )}
         </div>
-      </motion.div>
+
+        <p className="text-[11px] text-zinc-500">Supports JPG, PNG or WEBP (Max 2MB)</p>
+      </div>
+
+      {selectedFile && (
+        <button
+          onClick={handleSave}
+          disabled={isSubmitting}
+          className="w-full bg-[#FF5F1F] hover:bg-orange-600 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-orange-950/30 disabled:opacity-50"
+        >
+          {isSubmitting ? "Uploading..." : "Confirm & Upload Avatar"}
+        </button>
+      )}
     </div>
   );
 }

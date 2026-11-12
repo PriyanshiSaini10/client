@@ -1,6 +1,6 @@
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { HiMail, HiPhone, HiLocationMarker } from 'react-icons/hi';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaShieldAlt } from 'react-icons/fa';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -77,7 +77,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
+                <Link to="/contact-us" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
                   Contact
                 </Link>
               </li>
@@ -128,18 +128,18 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <HiLocationMarker className="text-[#FF5F1F] text-lg mt-0.5 flex-shrink-0" />
                 <span className="text-zinc-400 text-sm">
-                  123 Book Street<br />Kaithal,India
+                  123 Book Street<br />Kaithal, India
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <HiPhone className="text-[#FF5F1F] text-lg flex-shrink-0" />
-                <a href="tel:+1234567890" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
+                <a href="tel:+919675426548" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
                   +91 96754 26548
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <HiMail className="text-[#FF5F1F] text-lg flex-shrink-0" />
-                <a href="mailto:support@librocart.com" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
+                <a href="mailto:librocart987@gmail.com" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
                   librocart987@gmail.com
                 </a>
               </li>
@@ -173,7 +173,7 @@ export default function Footer() {
             <p className="text-zinc-400 text-sm text-center md:text-left">
               © {currentYear} LibroCart. All rights reserved.
             </p>
-            <div className="flex gap-6">
+            <div className="flex items-center gap-6">
               <a href="#" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
                 Privacy Policy
               </a>
@@ -183,6 +183,16 @@ export default function Footer() {
               <a href="#" className="text-zinc-400 hover:text-[#FF5F1F] transition-colors text-sm">
                 Cookie Policy
               </a>
+
+              {/* Subtle Admin Portal Link */}
+              <Link
+                to="/admin-login"
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-[#FF5F1F] transition-colors py-1 px-2 rounded hover:bg-zinc-900 border border-transparent hover:border-zinc-800"
+                title="Staff Login"
+              >
+                <FaShieldAlt className="text-[10px]" />
+                <span>Admin</span>
+              </Link>
             </div>
           </div>
         </div>

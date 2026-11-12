@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlineHome, HiOutlineInformationCircle, HiOutlineCollection, HiOutlineMail, HiMenu, HiX, HiOutlineBookOpen } from 'react-icons/hi';
 import Profile from './Profile.jsx';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AllContext.jsx';
+import { useAuth } from '../context/AllContext.jsx';
 
 export default function Navbar() {
   const [showMenu, setShowMenu] = useState(false);

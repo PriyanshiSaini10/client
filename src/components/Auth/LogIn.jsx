@@ -7,46 +7,54 @@ import axios from 'axios';
 import { validationLoginSchema } from '../Validation/AllValidation.jsx'; 
 import { showSuccessToast, showErrorToast } from '../Notification/ToastNotification.jsx';
 import { LocalUrl } from '../../GlobalUrl.jsx';
+import { useAuth } from '../context/AllContext.jsx'; 
 
 export default function LogIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  const { login } = useAuth() || {};
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: validationLoginSchema,
     onSubmit: async (values) => {
-
       setIsSubmitting(true);
       try {
-        const response = await axios.post(`${LocalUrl}user_log_in`, values)
-        console.log(response.data);
-          if(response.status==200 || response.status==201) {
-          showSuccessToast(response?.data?.msg || "Succesfully Logged in")
-          localStorage.setItem("userId", response?.data?.id);
-          localStorage.setItem("userToken", response?.data?.token);
-          localStorage.setItem("name", response?.data?.name);
-          localStorage.setItem("email", response?.data?.email);
+        const response = await axios.post(`${LocalUrl}user_log_in`, values);
+        
+        if (response.status === 200 || response.status === 201) {
+          showSuccessToast(response?.data?.msg || "Successfully Logged in");
+          
+          // Instant sync through context function
+          if (login) {
+            login({
+              id: response?.data?.id,
+              token: response?.data?.token,
+              name: response?.data?.name,
+              email: response?.data?.email,
+            });
+          }
+
           navigate("/");
+        } 
       } 
-    }
       catch (error) {
-          if (error?.response?.data?.msg === "Pls verify otp") {
+        if (error?.response?.data?.msg === "Pls verify otp") {
           localStorage.setItem("email", error?.response?.data?.email);
-          navigate(`/otp/user_otp_verification/${error?.response?.data?.id}`)
+          navigate(`/otp/user_otp_verification/${error?.response?.data?.id}`);
           showSuccessToast("Please verify your account");
-      }
-       else if (error?.response?.data?.msg === "User not found") {
+        }
+        else if (error?.response?.data?.msg === "User not found") {
           navigate("/create-account");
           showErrorToast(error.response?.data?.msg);
-       }
-       else{
-         showErrorToast(error?.response?.data?.msg || "Server error");
-       }
-    }
-       finally {
+        }
+        else {
+          showErrorToast(error?.response?.data?.msg || "Server error");
+        }
+      }
+      finally {
         setIsSubmitting(false);
       }
     }
@@ -139,7 +147,7 @@ export default function LogIn() {
               <input type="checkbox" className="h-4 w-4 bg-[#121212] border-zinc-800 text-[#FF5F1F] focus:ring-[#FF5F1F] rounded" />
               <label className="ml-2 text-zinc-400">Remember me</label>
             </div>
-            <Link to="/forgot-password" size="sm" className="text-[#FF5F1F] hover:underline font-medium">
+            <Link to="/forgot-password" className="text-[#FF5F1F] hover:underline font-medium">
               Forgot password?
             </Link>
           </div>
